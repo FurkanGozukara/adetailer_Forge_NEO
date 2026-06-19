@@ -103,6 +103,20 @@ print(
 )
 
 
+def cmd_opts_use_cpu(target: str) -> bool:
+    use_cpu = getattr(shared.cmd_opts, "use_cpu", ())
+    if use_cpu is None:
+        return False
+    if isinstance(use_cpu, str):
+        entries = use_cpu.split(",")
+    elif isinstance(use_cpu, Sequence):
+        entries = use_cpu
+    else:
+        entries = (use_cpu,)
+
+    return target in {str(entry).strip() for entry in entries}
+
+
 class AfterDetailerScript(scripts.Script):
     def __init__(self):
         super().__init__()
@@ -264,7 +278,7 @@ class AfterDetailerScript(scripts.Script):
 
     @staticmethod
     def get_ultralytics_device() -> str:
-        if "adetailer" in shared.cmd_opts.use_cpu:
+        if cmd_opts_use_cpu("adetailer"):
             return "cpu"
 
         if platform.system() == "Darwin":
